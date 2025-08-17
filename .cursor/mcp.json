@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "lente-legislativa": {
+      "type": "http",
+      "url": "https://localhost-24c7f5be.deco.host/mcp"
+    }
+  }
+}
