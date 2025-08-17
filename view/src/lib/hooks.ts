@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-query";
 
 export const useListPropositions = (
-  filters: { siglaTipo: string[]; ano?: number; palavrasChave?: string },
+  filters: { siglaTipo: string[]; ano?: number; codTema?: string },
 ) => {
   return useInfiniteQuery({
     queryKey: ["propositions", filters],

@@ -13,7 +13,7 @@ function HomePage() {
     "MPV",
   ]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [keywords, setKeywords] = useState("")
+  const [selectedTheme, setSelectedTheme] = useState("");
 
   const {
     data,
@@ -26,7 +26,7 @@ function HomePage() {
   } = useListPropositions({
     siglaTipo: selectedTypes,
     ano: selectedYear,
-    palavrasChave: keywords,
+    codTema: selectedTheme,
   });
 
   const handleTypeToggle = (type: string) => {
@@ -39,14 +39,14 @@ function HomePage() {
     setSelectedYear(year);
   };
 
-  const handleKeywordsChange = (keywords: string) => {
-    setKeywords(keywords);
+  const handleThemeChange = (theme: string) => {
+    setSelectedTheme(theme);
   };
 
   const handleClearFilters = () => {
     setSelectedTypes([]);
     setSelectedYear(new Date().getFullYear());
-    setKeywords("");
+    setSelectedTheme("");
   };
 
   const handleRefresh = () => {
@@ -92,10 +92,10 @@ function HomePage() {
           <PropositionFilterBar
             selectedTypes={selectedTypes}
             selectedYear={selectedYear}
-            searchTerm={keywords}
+            selectedTheme={selectedTheme}
             onTypeToggle={handleTypeToggle}
             onYearChange={handleYearChange}
-            onSearchChange={handleKeywordsChange}
+            onThemeChange={handleThemeChange}
             onClearFilters={handleClearFilters}
           />
         </div>

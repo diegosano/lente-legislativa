@@ -31,6 +31,7 @@ export const createListPropositionsTool = (env: Env) =>
       ano: z.number().optional(),
       pagina: z.number().optional(),
       palavrasChave: z.string().optional(),
+      codTema: z.string().optional(),
     }),
     outputSchema: z.object({
       propositions: z.array(
@@ -58,6 +59,10 @@ export const createListPropositionsTool = (env: Env) =>
       }
       if (context.palavrasChave) {
         params.append("keywords", context.palavrasChave);
+      }
+
+      if (context.codTema) {
+        params.append("codTema", context.codTema);
       }
 
       params.append("ordem", "DESC");
