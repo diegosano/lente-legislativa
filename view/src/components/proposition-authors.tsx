@@ -6,10 +6,10 @@ import { client } from "@/lib/rpc";
 type PropositionDetailsOutput = Awaited<
   ReturnType<typeof client.GET_PROPOSITION_DETAILS>
 >;
-type Author = PropositionDetailsOutput["autores"][number];
+type Authors = PropositionDetailsOutput["authors"];
 
 interface PropositionAuthorsProps {
-  authors: Author[];
+  authors: Authors;
 }
 
 export function PropositionAuthors({ authors }: PropositionAuthorsProps) {

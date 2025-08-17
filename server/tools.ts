@@ -88,7 +88,7 @@ export const createListPropositionsTool = (env: Env) =>
 export const createGetPropositionTool = (env: Env) =>
   createTool({
     id: "GET_PROPOSITION",
-    description: "Get the details of a proposition, including its authors",
+    description: "Get the details of a proposition",
     inputSchema: z.object({
       id: z.number(),
     }),
@@ -123,14 +123,48 @@ export const createGetPropositionTool = (env: Env) =>
       }),
     }),
     execute: async ({ context }) => {
-      const propDetailsPromise = await fetch(
+      const response = await fetch(
         `https://dadosabertos.camara.leg.br/api/v2/proposicoes/${context.id}`,
         { headers: { Accept: "application/json" } },
-      ).then((res) => res.json());
+      );
 
-      return {
-        ...propDetailsPromise.dados,
-      };
+      if (!response.ok) {
+        throw new Error("Failed to fetch proposition details");
+      }
+
+      const data = await response.json();
+      return data.dados;
+    },
+  });
+
+export const createGetPropositionAuthorsTool = (env: Env) =>
+  createTool({
+    id: "GET_PROPOSITION_AUTHORS",
+    description: "Get the authors of a proposition",
+    inputSchema: z.object({
+      id: z.number(),
+    }),
+    outputSchema: z.array(
+      z.object({
+        nome: z.string(),
+        tipo: z.string(),
+        uri: z.string(),
+        ordemAssinatura: z.number(),
+        proponente: z.number(),
+      }),
+    ),
+    execute: async ({ context }) => {
+      const response = await fetch(
+        `https://dadosabertos.camara.leg.br/api/v2/proposicoes/${context.id}/autores`,
+        { headers: { Accept: "application/json" } },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch proposition authors");
+      }
+
+      const data = await response.json();
+      return data.dados;
     },
   });
 
@@ -138,122 +172,38 @@ export const createGetPropositionProceduresTool = (env: Env) =>
   createTool({
     id: "GET_PROPOSITION_PROCEDURES",
     description: "Get the procedures of a proposition",
-    inputSchema: z.object({ id: z.number() }),
-    outputSchema: z.object({
-      procedures: z.array(
-        z.object({
-          id: z.string().nullable(),
-          uri: z.string().nullable(),
-          dataHora: z.string().nullable(),
-          sequencia: z.number().nullable(),
-          siglaOrgao: z.string().nullable(),
-          uriOrgao: z.string().nullable(),
-          regime: z.string().nullable(),
-          descricaoTramitacao: z.string().nullable(),
-          codTipoTramitacao: z.string().nullable(),
-          descricaoSituacao: z.string().nullable(),
-          codSituacao: z.number().nullable(),
-          despacho: z.string().nullable(),
-          url: z.string().nullable(),
-        }),
-      ),
+    inputSchema: z.object({
+      id: z.number(),
     }),
+    outputSchema: z.array(
+      z.object({
+        id: z.string().nullable(),
+        uri: z.string().nullable(),
+        dataHora: z.string().nullable(),
+        sequencia: z.number().nullable(),
+        siglaOrgao: z.string().nullable(),
+        uriOrgao: z.string().nullable(),
+        regime: z.string().nullable(),
+        descricaoTramitacao: z.string().nullable(),
+        codTipoTramitacao: z.string().nullable(),
+        descricaoSituacao: z.string().nullable(),
+        codSituacao: z.number().nullable(),
+        despacho: z.string().nullable(),
+        url: z.string().nullable(),
+      }),
+    ),
     execute: async ({ context }) => {
       const response = await fetch(
         `https://dadosabertos.camara.leg.br/api/v2/proposicoes/${context.id}/tramitacoes`,
         { headers: { Accept: "application/json" } },
       );
+
       if (!response.ok) {
         throw new Error("Failed to fetch proposition procedures");
       }
-      const data = await response.json();
-      return { procedures: data.dados };
-    },
-  });
 
-export const createGetPropositionDetailsTool = (env: Env) =>
-  createTool({
-    id: "GET_PROPOSITION_DETAILS",
-    description: "Get the proposition's details, authors, votings and procedures",
-    inputSchema: z.object({ id: z.number() }),
-    outputSchema: z.object({
-      proposition: z.object({
-        id: z.number(),
-        uri: z.string(),
-        siglaTipo: z.string(),
-        codTipo: z.number(),
-        numero: z.number(),
-        ano: z.number(),
-        ementa: z.string(),
-        ementaDetalhada: z.string().nullable(),
-        dataApresentacao: z.string().nullable(),
-        justificativa: z.string().nullable(),
-        keywords: z.string().nullable(),
-        urlInteiroTeor: z.string().nullable(),
-        statusProposicao: z.object({
-          dataHora: z.string(),
-          sequencia: z.number(),
-          siglaOrgao: z.string(),
-          uriOrgao: z.string(),
-          uriUltimoRelator: z.string().nullable(),
-          regime: z.string(),
-          descricaoTramitacao: z.string(),
-          codTipoTramitacao: z.string(),
-          descricaoSituacao: z.string().nullable(),
-          codSituacao: z.number().nullable(),
-          despacho: z.string(),
-          url: z.string().nullable(),
-          ambito: z.string(),
-          apreciacao: z.string(),
-        }),
-      }),
-      authors: z.array(
-        z.object({
-          nome: z.string(),
-          tipo: z.string(),
-          uri: z.string(),
-          ordemAssinatura: z.number(),
-          proponente: z.number(),
-        }),
-      ),
-      procedures: z.array(
-        z.object({
-          id: z.string().nullable(),
-          uri: z.string().nullable(),
-          dataHora: z.string().nullable(),
-          sequencia: z.number().nullable(),
-          siglaOrgao: z.string().nullable(),
-          uriOrgao: z.string().nullable(),
-          regime: z.string().nullable(),
-          descricaoTramitacao: z.string().nullable(),
-          codTipoTramitacao: z.string().nullable(),
-          descricaoSituacao: z.string().nullable(),
-          codSituacao: z.number().nullable(),
-          despacho: z.string().nullable(),
-          url: z.string().nullable(),
-        }),
-      ),
-    }),
-    execute: async ({ context, runtimeContext }) => {
-      const [proposition, authors, procedures] = await Promise.all([
-        createGetPropositionTool(env).execute({
-          context,
-          runtimeContext,
-        }),
-        fetch(
-          `https://dadosabertos.camara.leg.br/api/v2/proposicoes/${context.id}/autores`,
-          { headers: { Accept: "application/json" } },
-        ).then((res) => res.json()),
-        createGetPropositionProceduresTool(env).execute({
-          context,
-          runtimeContext,
-        }),
-      ]);
-      return {
-        proposition,
-        authors: authors.dados,
-        procedures: procedures.procedures,
-      };
+      const data = await response.json();
+      return data.dados;
     },
   });
 
@@ -303,10 +253,52 @@ export const createExplainPropositionAITool = (env: Env) =>
     },
   });
 
+export const createGetPropositionDetailsTool = (env: Env) =>
+  createTool({
+    id: "GET_PROPOSITION_DETAILS",
+    description: "Get the details of a proposition, including its authors, procedures and AI explanation",
+    inputSchema: z.object({
+      id: z.number(),
+    }),
+    outputSchema: z.object({
+      proposition: createGetPropositionTool(env).outputSchema,
+      authors: createGetPropositionAuthorsTool(env).outputSchema,
+      procedures: createGetPropositionProceduresTool(env).outputSchema,
+      explanation: createExplainPropositionAITool(env).outputSchema,
+    }),
+    execute: async ({ context, runtimeContext }) => {
+      const getProposition = createGetPropositionTool(env);
+      const getAuthors = createGetPropositionAuthorsTool(env);
+      const getProcedures = createGetPropositionProceduresTool(env);
+      const explainProposition = createExplainPropositionAITool(env);
+
+      const [proposition, authors, procedures] = await Promise.all([
+        getProposition.execute({ context, runtimeContext }),
+        getAuthors.execute({ context, runtimeContext }),
+        getProcedures.execute({ context, runtimeContext }),
+      ]);
+
+      const explanation = await explainProposition.execute({
+        context: {
+          ementa: proposition.ementaDetalhada || proposition.ementa,
+        },
+        runtimeContext,
+      });
+
+      return {
+        proposition,
+        authors,
+        procedures,
+        explanation,
+      };
+    },
+  });
+
 export const tools = [
   createListPropositionsTool,
-  createExplainPropositionAITool,
-  createGetPropositionProceduresTool,
   createGetPropositionTool,
+  createGetPropositionAuthorsTool,
+  createGetPropositionProceduresTool,
+  createExplainPropositionAITool,
   createGetPropositionDetailsTool,
 ];

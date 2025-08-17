@@ -7,7 +7,6 @@
 import { DefaultEnv, withRuntime } from "@deco/workers-runtime";
 import { type Env as DecoEnv, StateSchema } from "./deco.gen.ts";
 
-import { workflows } from "./workflows.ts";
 import { tools } from "./tools.ts";
 import { views } from "./views.ts";
 
@@ -70,7 +69,6 @@ const runtime = withRuntime<Env, typeof StateSchema>({
     state: StateSchema,
   },
   views,
-  workflows,
   tools,
   fetch: fallbackToView("/"),
 });
