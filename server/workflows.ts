@@ -16,19 +16,56 @@ import {
   createWorkflow,
 } from "@deco/workers-runtime/mastra";
 import { z } from "zod";
-import { Env } from "./main";
-// import { createMyTool } from "./tools";
+import type { Env } from "./main.ts";
+import {
+  createGetPropositionTool,
+  createGetPropositionAuthorsTool,
+  createGetPropositionProceduresTool,
+  createExplainPropositionAITool,
+} from "./tools.ts";
 
-const createMyWorkflow = (env: Env) => {
-  // const step = createStepFromTool(createMyTool(env));
+export const createPropositionDetailsWorkflow = (env: Env) => {
+  // Create steps from our existing tools
+  const getPropositionStep = createStepFromTool(createGetPropositionTool(env));
+  const getAuthorsStep = createStepFromTool(createGetPropositionAuthorsTool(env));
+  const getProceduresStep = createStepFromTool(createGetPropositionProceduresTool(env));
+  const explainPropositionStep = createStepFromTool(createExplainPropositionAITool(env));
 
-  // return createWorkflow({
-  //   id: "MY_WORKFLOW",
-  //   inputSchema: z.object({ name: z.string() }),
-  //   outputSchema: z.object({ message: z.string() }),
-  // })
-  //   .then(step)
-  //   .commit();
+  return createWorkflow({
+    id: "PROPOSITION_DETAILS_WORKFLOW",
+    description: "Process a proposition to get its details, authors, procedures, and AI explanation",
+    inputSchema: z.object({
+      id: z.number(),
+    }),
+    outputSchema: z.object({
+      proposition: createGetPropositionTool(env).outputSchema,
+      authors: createGetPropositionAuthorsTool(env).outputSchema,
+      procedures: createGetPropositionProceduresTool(env).outputSchema,
+      explanation: createExplainPropositionAITool(env).outputSchema,
+    }),
+  })
+    .parallel([getPropositionStep, getAuthorsStep, getProceduresStep])
+    .map(async ({ getStepResult }) => {
+      const proposition = getStepResult(getPropositionStep);
+      return {
+        ementa: proposition.ementaDetalhada || proposition.ementa,
+      };
+    })
+    .then(explainPropositionStep)
+    .map(async ({ getStepResult }) => {
+      const proposition = getStepResult(getPropositionStep);
+      const authors = getStepResult(getAuthorsStep);
+      const procedures = getStepResult(getProceduresStep);
+      const explanation = getStepResult(explainPropositionStep);
+
+      return {
+        proposition,
+        authors,
+        procedures,
+        explanation,
+      };
+    })
+    .commit();
 };
 
-export const workflows = [];
+export const workflows = [createPropositionDetailsWorkflow];
