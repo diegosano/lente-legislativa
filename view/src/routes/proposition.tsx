@@ -1,24 +1,22 @@
+import { useEffect } from "react";
 import { createRoute, type RootRoute, useParams } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import {
   useGetPropositionDetails,
-  useGetPropositionVotings,
   useExplainPropositionAI,
 } from "@/lib/hooks";
 import { PropositionHeader } from "@/components/proposition-header";
 import { PropositionContent } from "@/components/proposition-content";
 import { PropositionAuthors } from "@/components/proposition-authors";
-import { PropositionVotings } from "@/components/proposition-votings";
 import { AIExplanation } from "@/components/ai-explanation";
 import { BackButton } from "@/components/back-button";
-import { useEffect } from "react";
+import { PropositionTimeline } from "@/components/proposition-timeline";
 
 function PropositionPage() {
   const { id } = useParams({ from: "/proposition/$id" });
-  const { data: proposition, isLoading } = useGetPropositionDetails(
+  const { data, isLoading } = useGetPropositionDetails(
     parseInt(id, 10),
   );
-  const { data: votings } = useGetPropositionVotings(parseInt(id, 10));
   const {
     mutate: generateExplanation,
     data: explanationData,
@@ -27,10 +25,12 @@ function PropositionPage() {
   } = useExplainPropositionAI();
 
   useEffect(() => {
-    if (proposition) {
-      generateExplanation({ ementa: proposition.ementaDetalhada || proposition.ementa });
+    if (data?.proposition) {
+      generateExplanation({
+        ementa: data.proposition.ementaDetalhada || data.proposition.ementa,
+      });
     }
-  }, [proposition, generateExplanation]);
+  }, [data?.proposition, generateExplanation]);
 
   if (isLoading) {
     return (
@@ -47,9 +47,11 @@ function PropositionPage() {
     );
   }
 
-  if (!proposition) {
+  if (!data) {
     return <div>Proposição não encontrada.</div>;
   }
+
+  const { proposition, authors, procedures } = data;
 
   return (
     <div className="min-h-screen bg-background">
@@ -67,13 +69,11 @@ function PropositionPage() {
                 error={explanationError}
               />
               <PropositionContent proposition={proposition} />
-              {votings && votings.votings.length > 0 && (
-                <PropositionVotings votings={votings.votings} />
-              )}
             </div>
 
             <div className="space-y-6">
-              <PropositionAuthors authors={proposition.autores} />
+              <PropositionAuthors authors={authors} />
+              <PropositionTimeline procedures={procedures} />
             </div>
           </div>
         </div>

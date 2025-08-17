@@ -77,7 +77,7 @@ function HomePage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold">Dashboard de Proposições</h1>
+              <h1 className="text-3xl font-bold">Lente Legislativa</h1>
               <p className="text-muted-foreground mt-2">
                 Acompanhe as últimas proposições da Câmara dos Deputados
               </p>

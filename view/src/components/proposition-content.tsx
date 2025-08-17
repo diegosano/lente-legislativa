@@ -3,12 +3,12 @@ import { Separator } from "@/components/ui/separator"
 import { formatDate } from "@/lib/utils";
 import { client } from "@/lib/rpc";
 
-type PropositionDetails = Awaited<
+type Proposition = Awaited<
   ReturnType<typeof client.GET_PROPOSITION_DETAILS>
->;
+>["proposition"];
 
 interface PropositionContentProps {
-  proposition: PropositionDetails;
+  proposition: Proposition;
 }
 
 export function PropositionContent({ proposition }: PropositionContentProps) {
@@ -41,13 +41,13 @@ export function PropositionContent({ proposition }: PropositionContentProps) {
       {proposition.statusProposicao && (
         <Card>
           <CardHeader>
-            <CardTitle>Status da Tramitação</CardTitle>
+            <CardTitle>Status</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground mb-1">Situação Atual</h4>
-                <p className="text-sm">{proposition.statusProposicao.descricaoSituacao}</p>
+                <p className="text-sm">{proposition.statusProposicao.descricaoSituacao ?? "-"}</p>
               </div>
 
               <div>

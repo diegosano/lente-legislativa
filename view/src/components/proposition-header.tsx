@@ -5,12 +5,12 @@ import { formatPropositionType, formatDate, getPropositionTypeColor, getProposit
 import { Button } from "@/components/ui/button";
 import { client } from "@/lib/rpc";
 
-type PropositionDetails = Awaited<
+type Proposition = Awaited<
   ReturnType<typeof client.GET_PROPOSITION_DETAILS>
->;
+>["proposition"];
 
 interface PropositionHeaderProps {
-  proposition: PropositionDetails;
+  proposition: Proposition;
 }
 
 export function PropositionHeader({ proposition }: PropositionHeaderProps) {

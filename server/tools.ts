@@ -85,9 +85,9 @@ export const createListPropositionsTool = (env: Env) =>
     },
   });
 
-export const createGetPropositionDetailsTool = (env: Env) =>
+export const createGetPropositionTool = (env: Env) =>
   createTool({
-    id: "GET_PROPOSITION_DETAILS",
+    id: "GET_PROPOSITION",
     description: "Get the details of a proposition, including its authors",
     inputSchema: z.object({
       id: z.number(),
@@ -121,7 +121,93 @@ export const createGetPropositionDetailsTool = (env: Env) =>
         ambito: z.string(),
         apreciacao: z.string(),
       }),
-      autores: z.array(
+    }),
+    execute: async ({ context }) => {
+      const propDetailsPromise = await fetch(
+        `https://dadosabertos.camara.leg.br/api/v2/proposicoes/${context.id}`,
+        { headers: { Accept: "application/json" } },
+      ).then((res) => res.json());
+
+      return {
+        ...propDetailsPromise.dados,
+      };
+    },
+  });
+
+export const createGetPropositionProceduresTool = (env: Env) =>
+  createTool({
+    id: "GET_PROPOSITION_PROCEDURES",
+    description: "Get the procedures of a proposition",
+    inputSchema: z.object({ id: z.number() }),
+    outputSchema: z.object({
+      procedures: z.array(
+        z.object({
+          id: z.string().nullable(),
+          uri: z.string().nullable(),
+          dataHora: z.string().nullable(),
+          sequencia: z.number().nullable(),
+          siglaOrgao: z.string().nullable(),
+          uriOrgao: z.string().nullable(),
+          regime: z.string().nullable(),
+          descricaoTramitacao: z.string().nullable(),
+          codTipoTramitacao: z.string().nullable(),
+          descricaoSituacao: z.string().nullable(),
+          codSituacao: z.number().nullable(),
+          despacho: z.string().nullable(),
+          url: z.string().nullable(),
+        }),
+      ),
+    }),
+    execute: async ({ context }) => {
+      const response = await fetch(
+        `https://dadosabertos.camara.leg.br/api/v2/proposicoes/${context.id}/tramitacoes`,
+        { headers: { Accept: "application/json" } },
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch proposition procedures");
+      }
+      const data = await response.json();
+      return { procedures: data.dados };
+    },
+  });
+
+export const createGetPropositionDetailsTool = (env: Env) =>
+  createTool({
+    id: "GET_PROPOSITION_DETAILS",
+    description: "Get the proposition's details, authors, votings and procedures",
+    inputSchema: z.object({ id: z.number() }),
+    outputSchema: z.object({
+      proposition: z.object({
+        id: z.number(),
+        uri: z.string(),
+        siglaTipo: z.string(),
+        codTipo: z.number(),
+        numero: z.number(),
+        ano: z.number(),
+        ementa: z.string(),
+        ementaDetalhada: z.string().nullable(),
+        dataApresentacao: z.string().nullable(),
+        justificativa: z.string().nullable(),
+        keywords: z.string().nullable(),
+        urlInteiroTeor: z.string().nullable(),
+        statusProposicao: z.object({
+          dataHora: z.string(),
+          sequencia: z.number(),
+          siglaOrgao: z.string(),
+          uriOrgao: z.string(),
+          uriUltimoRelator: z.string().nullable(),
+          regime: z.string(),
+          descricaoTramitacao: z.string(),
+          codTipoTramitacao: z.string(),
+          descricaoSituacao: z.string().nullable(),
+          codSituacao: z.number().nullable(),
+          despacho: z.string(),
+          url: z.string().nullable(),
+          ambito: z.string(),
+          apreciacao: z.string(),
+        }),
+      }),
+      authors: z.array(
         z.object({
           nome: z.string(),
           tipo: z.string(),
@@ -130,59 +216,44 @@ export const createGetPropositionDetailsTool = (env: Env) =>
           proponente: z.number(),
         }),
       ),
-    }),
-    execute: async ({ context }) => {
-      const propDetailsPromise = fetch(
-        `https://dadosabertos.camara.leg.br/api/v2/proposicoes/${context.id}`,
-        { headers: { Accept: "application/json" } },
-      ).then((res) => res.json());
-
-      const authorsPromise = fetch(
-        `https://dadosabertos.camara.leg.br/api/v2/proposicoes/${context.id}/autores`,
-        { headers: { Accept: "application/json" } },
-      ).then((res) => res.json());
-
-      const [propDetailsResponse, authorsResponse] = await Promise.all([
-        propDetailsPromise,
-        authorsPromise,
-      ]);
-
-      return {
-        ...propDetailsResponse.dados,
-        autores: authorsResponse.dados,
-      };
-    },
-  });
-
-export const createGetPropositionVotingsTool = (env: Env) =>
-  createTool({
-    id: "GET_PROPOSITION_VOTINGS",
-    description: "Get the votings of a proposition",
-    inputSchema: z.object({ id: z.number() }),
-    outputSchema: z.object({
-      votings: z.array(
+      procedures: z.array(
         z.object({
-          id: z.string(),
-          data: z.string(),
-          siglaOrgao: z.string(),
-          aprovacao: z.number().nullable(),
-          placarSim: z.number(),
-          placarNao: z.number(),
-          placarAbstencao: z.number(),
-          presentes: z.number(),
+          id: z.string().nullable(),
+          uri: z.string().nullable(),
+          dataHora: z.string().nullable(),
+          sequencia: z.number().nullable(),
+          siglaOrgao: z.string().nullable(),
+          uriOrgao: z.string().nullable(),
+          regime: z.string().nullable(),
+          descricaoTramitacao: z.string().nullable(),
+          codTipoTramitacao: z.string().nullable(),
+          descricaoSituacao: z.string().nullable(),
+          codSituacao: z.number().nullable(),
+          despacho: z.string().nullable(),
+          url: z.string().nullable(),
         }),
       ),
     }),
-    execute: async ({ context }) => {
-      const response = await fetch(
-        `https://dadosabertos.camara.leg.br/api/v2/proposicoes/${context.id}/votacoes`,
-        { headers: { Accept: "application/json" } },
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch proposition votings");
-      }
-      const data = await response.json();
-      return { votings: data.dados };
+    execute: async ({ context, runtimeContext }) => {
+      const [proposition, authors, procedures] = await Promise.all([
+        createGetPropositionTool(env).execute({
+          context,
+          runtimeContext,
+        }),
+        fetch(
+          `https://dadosabertos.camara.leg.br/api/v2/proposicoes/${context.id}/autores`,
+          { headers: { Accept: "application/json" } },
+        ).then((res) => res.json()),
+        createGetPropositionProceduresTool(env).execute({
+          context,
+          runtimeContext,
+        }),
+      ]);
+      return {
+        proposition,
+        authors: authors.dados,
+        procedures: procedures.procedures,
+      };
     },
   });
 
@@ -234,7 +305,8 @@ export const createExplainPropositionAITool = (env: Env) =>
 
 export const tools = [
   createListPropositionsTool,
-  createGetPropositionDetailsTool,
   createExplainPropositionAITool,
-  createGetPropositionVotingsTool,
+  createGetPropositionProceduresTool,
+  createGetPropositionTool,
+  createGetPropositionDetailsTool,
 ];
