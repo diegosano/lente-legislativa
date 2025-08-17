@@ -1,11 +1,11 @@
 import { client } from "./rpc-logged";
 import {
   useMutation,
-  useQueryClient,
   useSuspenseQuery,
+  useInfiniteQuery,
+  useQuery,
 } from "@tanstack/react-query";
 import { FailedToFetchUserError } from "@/components/logged-provider";
-import { toast } from "sonner";
 
 /**
  * This hook will throw an error if the user is not logged in.
@@ -52,84 +52,39 @@ export const useOptionalUser = () => {
   });
 };
 
-/**
- * Example hooks from the template
- */
-
-export const useListTodos = () => {
-  return useSuspenseQuery({
-    queryKey: ["todos"],
-    queryFn: () => client.LIST_TODOS({}),
+export const useListPropositions = (
+  filters: { siglaTipo: string[]; ano?: number; palavrasChave?: string },
+) => {
+  return useInfiniteQuery({
+    queryKey: ["propositions", filters],
+    queryFn: ({ pageParam = 1 }) =>
+      client.LIST_PROPOSITIONS({ ...filters, pagina: pageParam }),
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.propositions.length > 0 ? allPages.length + 1 : undefined;
+    },
+    initialPageParam: 1,
   });
 };
 
-export const useGenerateTodoWithAI = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: () => client.GENERATE_TODO_WITH_AI({}),
-    onSuccess: (data) => {
-      queryClient.setQueryData(["todos"], (old: any) => {
-        if (!old?.todos) return old;
-        return {
-          ...old,
-          todos: [...old.todos, data.todo],
-        };
-      });
-    },
+export const useGetPropositionDetails = (id: number) => {
+  return useQuery({
+    queryKey: ["propositionDetails", id],
+    queryFn: () => client.GET_PROPOSITION_DETAILS({ id }),
+    enabled: !!id,
   });
 };
 
-export const useToggleTodo = () => {
-  const queryClient = useQueryClient();
+export const useExplainPropositionAI = () => {
   return useMutation({
-    mutationFn: (id: number) =>
-      client.TOGGLE_TODO({ id }, {
-        handleResponse: (res: Response) => {
-          if (res.status === 401) {
-            toast.error("You need to be logged in to toggle todos");
-            throw new Error("Unauthorized to toggle TODO");
-          }
-          return res.json();
-        },
-      }),
-    onSuccess: (data) => {
-      // Update the todos list with the updated todo
-      queryClient.setQueryData(["todos"], (old: any) => {
-        if (!old?.todos) return old;
-        return {
-          ...old,
-          todos: old.todos.map((todo: any) =>
-            todo.id === data.todo.id ? data.todo : todo
-          ),
-        };
-      });
-    },
+    mutationFn: (props: { ementa: string }) =>
+      client.EXPLAIN_PROPOSITION_AI(props),
   });
 };
 
-export const useDeleteTodo = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: number) =>
-      client.DELETE_TODO({ id }, {
-        handleResponse: (res: Response) => {
-          if (res.status === 401) {
-            toast.error("You need to be logged in to delete todos");
-            throw new Error("Unauthorized to delete TODO");
-          }
-          return res.json();
-        },
-      }),
-    onSuccess: (data) => {
-      // Remove the deleted todo from the todos list
-      queryClient.setQueryData(["todos"], (old: any) => {
-        if (!old?.todos) return old;
-        return {
-          ...old,
-          todos: old.todos.filter((todo: any) => todo.id !== data.deletedId),
-        };
-      });
-      toast.success("Todo deleted successfully");
-    },
+export const useGetPropositionVotings = (id: number) => {
+  return useQuery({
+    queryKey: ["propositionVotings", id],
+    queryFn: () => client.GET_PROPOSITION_VOTINGS({ id }),
+    enabled: !!id,
   });
 };

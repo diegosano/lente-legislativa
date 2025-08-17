@@ -1,5 +1,7 @@
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
+import { Toaster } from "sonner";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   createRootRoute,
   createRouter,
@@ -7,10 +9,9 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import HomePage from "./routes/home.tsx";
-import { Toaster } from "sonner";
+import PropositionPage from "./routes/proposition.tsx";
 
 import "./styles.css";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const rootRoute = createRootRoute({
   component: () => <Outlet />,
@@ -18,6 +19,7 @@ const rootRoute = createRootRoute({
 
 const routeTree = rootRoute.addChildren([
   HomePage(rootRoute),
+  PropositionPage(rootRoute),
 ]);
 
 const queryClient = new QueryClient();
