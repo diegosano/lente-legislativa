@@ -253,6 +253,34 @@ export const createExplainPropositionAITool = (env: Env) =>
     },
   });
 
+export const createGetPropositionThemesTool = (env: Env) =>
+  createTool({
+    id: "GET_PROPOSITION_THEMES",
+    description: "Get the themes of a proposition",
+    inputSchema: z.object({
+      id: z.number(),
+    }),
+    outputSchema: z.array(
+      z.object({
+        codTema: z.number(),
+        tema: z.string(),
+      }),
+    ),
+    execute: async ({ context }) => {
+      const response = await fetch(
+        `https://dadosabertos.camara.leg.br/api/v2/proposicoes/${context.id}/temas`,
+        { headers: { Accept: "application/json" } },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch proposition themes");
+      }
+
+      const data = await response.json();
+      return data.dados;
+    },
+  });
+
 export const createGetPropositionDetailsTool = (env: Env) =>
   createTool({
     id: "GET_PROPOSITION_DETAILS",
@@ -265,17 +293,20 @@ export const createGetPropositionDetailsTool = (env: Env) =>
       authors: createGetPropositionAuthorsTool(env).outputSchema,
       procedures: createGetPropositionProceduresTool(env).outputSchema,
       explanation: createExplainPropositionAITool(env).outputSchema,
+      themes: createGetPropositionThemesTool(env).outputSchema,
     }),
     execute: async ({ context, runtimeContext }) => {
       const getProposition = createGetPropositionTool(env);
       const getAuthors = createGetPropositionAuthorsTool(env);
       const getProcedures = createGetPropositionProceduresTool(env);
+      const getThemes = createGetPropositionThemesTool(env);
       const explainProposition = createExplainPropositionAITool(env);
 
-      const [proposition, authors, procedures] = await Promise.all([
+      const [proposition, authors, procedures, themes] = await Promise.all([
         getProposition.execute({ context, runtimeContext }),
         getAuthors.execute({ context, runtimeContext }),
         getProcedures.execute({ context, runtimeContext }),
+        getThemes.execute({ context, runtimeContext }),
       ]);
 
       const explanation = await explainProposition.execute({
@@ -289,6 +320,7 @@ export const createGetPropositionDetailsTool = (env: Env) =>
         proposition,
         authors,
         procedures,
+        themes,
         explanation,
       };
     },
@@ -299,6 +331,7 @@ export const tools = [
   createGetPropositionTool,
   createGetPropositionAuthorsTool,
   createGetPropositionProceduresTool,
+  createGetPropositionThemesTool,
   createExplainPropositionAITool,
   createGetPropositionDetailsTool,
 ];

@@ -21,6 +21,7 @@ import {
   createGetPropositionTool,
   createGetPropositionAuthorsTool,
   createGetPropositionProceduresTool,
+  createGetPropositionThemesTool,
   createExplainPropositionAITool,
 } from "./tools.ts";
 
@@ -29,6 +30,7 @@ export const createPropositionDetailsWorkflow = (env: Env) => {
   const getPropositionStep = createStepFromTool(createGetPropositionTool(env));
   const getAuthorsStep = createStepFromTool(createGetPropositionAuthorsTool(env));
   const getProceduresStep = createStepFromTool(createGetPropositionProceduresTool(env));
+  const getThemesStep = createStepFromTool(createGetPropositionThemesTool(env));
   const explainPropositionStep = createStepFromTool(createExplainPropositionAITool(env));
 
   return createWorkflow({
@@ -41,10 +43,11 @@ export const createPropositionDetailsWorkflow = (env: Env) => {
       proposition: createGetPropositionTool(env).outputSchema,
       authors: createGetPropositionAuthorsTool(env).outputSchema,
       procedures: createGetPropositionProceduresTool(env).outputSchema,
+      themes: createGetPropositionThemesTool(env).outputSchema,
       explanation: createExplainPropositionAITool(env).outputSchema,
     }),
   })
-    .parallel([getPropositionStep, getAuthorsStep, getProceduresStep])
+    .parallel([getPropositionStep, getAuthorsStep, getProceduresStep, getThemesStep])
     .map(async ({ getStepResult }) => {
       const proposition = getStepResult(getPropositionStep);
       return {
@@ -56,12 +59,14 @@ export const createPropositionDetailsWorkflow = (env: Env) => {
       const proposition = getStepResult(getPropositionStep);
       const authors = getStepResult(getAuthorsStep);
       const procedures = getStepResult(getProceduresStep);
+      const themes = getStepResult(getThemesStep);
       const explanation = getStepResult(explainPropositionStep);
 
       return {
         proposition,
         authors,
         procedures,
+        themes,
         explanation,
       };
     })

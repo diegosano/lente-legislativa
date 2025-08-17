@@ -38,7 +38,6 @@ export function AIExplanation({ explanation, isLoading, error }: AIExplanationPr
         {explanation && (
           <div className="prose prose-sm max-w-none">
             <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg">
-              <h4 className="font-semibold text-blue-900 mb-2">Explicação Simplificada:</h4>
               <p className="text-blue-800 leading-relaxed whitespace-pre-wrap">{explanation}</p>
             </div>
           </div>

@@ -9,6 +9,7 @@ import { PropositionAuthors } from "@/components/proposition-authors";
 import { AIExplanation } from "@/components/ai-explanation";
 import { BackButton } from "@/components/back-button";
 import { PropositionTimeline } from "@/components/proposition-timeline";
+import { PropositionThemes } from "@/components/proposition-themes";
 
 function PropositionPage() {
   const { id } = useParams({ from: "/proposition/$id" });
@@ -35,7 +36,7 @@ function PropositionPage() {
     return <div>Proposição não encontrada.</div>;
   }
 
-  const { proposition, authors, procedures, explanation } = data;
+  const { proposition, authors, procedures, themes, explanation } = data;
 
   return (
     <div className="min-h-screen bg-background">
@@ -57,6 +58,7 @@ function PropositionPage() {
 
             <div className="space-y-6">
               <PropositionAuthors authors={authors} />
+              <PropositionThemes themes={themes} />
               <PropositionTimeline procedures={procedures} />
             </div>
           </div>
