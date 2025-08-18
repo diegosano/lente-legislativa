@@ -58,7 +58,6 @@ A comprehensive platform for analyzing and understanding Brazilian legislative d
 ### **Prerequisites**
 
 - Node.js >= 22.0.0
-- npm >= 8.0.0
 - Deco CLI installed globally
 
 ### **Installation**
@@ -157,7 +156,7 @@ A comprehensive platform for analyzing and understanding Brazilian legislative d
 
 ### **Documentation**
 
-- [Deco Platform Documentation](https://deco.chat/docs)
+- [Deco Platform Documentation](https://docs.deco.page/en/introduction/)
 - [Câmara dos Deputados API](https://dadosabertos.camara.leg.br/swagger/api.html)
 
 ## 📄 License
@@ -172,4 +171,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## Built with ❤️ for Brazilian democracy and transparency
+Built with ❤️ for Brazilian democracy and transparency
