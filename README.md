@@ -1,6 +1,6 @@
-# Lente Legislativa - Legislative Lens
+# Lente Legislativa
 
-A comprehensive platform for analyzing and understanding Brazilian legislative data using AI-powered insights and real-time data from the Câmara dos Deputados (Brazilian Chamber of Deputies).
+A comprehensive platform for analyzing and understanding Brazilian legislative data using AI-powered insights and real-time data from the Câmara dos Deputados.
 
 ## 🚀 Features
 
@@ -15,31 +15,12 @@ A comprehensive platform for analyzing and understanding Brazilian legislative d
 
 - **Procedures Analysis**: AI-generated explanations of what happened and what's next
 - **Proposition Summaries**: Intelligent summaries of complex legislative texts
-- **Voting Pattern Analysis**: Understand voting behaviors and outcomes
-- **Contextual Insights**: Get explanations tailored to specific legislative contexts
 
 ### 🎯 **Data Sources**
 
 - **Câmara dos Deputados**: Real-time legislative data
 
-## 🏗️ Architecture
-
-### **Backend (Deco MCP Server)**
-
-- **Cloudflare Workers**: Serverless backend infrastructure
-- **Deco Runtime**: MCP (Model Context Protocol) server for AI integration
-- **SQLite Database**: Persistent data storage with Drizzle ORM
-- **RESTful API**: Comprehensive endpoints for legislative data
-
-### **Frontend (React + TypeScript)**
-
-- **React 18**: Modern React with hooks and functional components
-- **TypeScript**: Full type safety and IntelliSense
-- **Tailwind CSS**: Utility-first CSS framework
-- **TanStack Query**: Server state management and caching
-- **TanStack Router**: Type-safe routing
-
-## 🛠️ Tools & Endpoints
+## 🛠️ Tools
 
 ### **Core Legislative Tools**
 
@@ -62,19 +43,15 @@ A comprehensive platform for analyzing and understanding Brazilian legislative d
 - `GET_PROPOSITION_DETAILS` - Comprehensive proposition data aggregation
 - `GET_PROPOSITION_DETAILS_AI` - AI-enhanced proposition analysis
 
-## 🎨 Views & Components
+## 🔄 **Workflows**
 
-### **Main Pages**
+### **Core Legislative Workflows**
 
-- **Home** (`/`) - Overview and navigation
-- **Propositions List** (`/propositions`) - Browse all legislative proposals
-- **Proposition Details** (`/proposition/:id`) - Comprehensive proposition view
-
-### **AI Analysis Components**
-
-- **Procedures Analyzer**: AI-powered analysis of legislative procedures
-- **Voting Insights**: Intelligent interpretation of voting patterns
-- **Timeline Analysis**: AI explanations of procedural developments
+- `PROPOSITION_DETAILS_WORKFLOW` - Comprehensive proposition analysis workflow
+  - **Purpose**: Process a proposition to get its details, authors, procedures, and AI explanation
+  - **Input**: Proposition ID
+  - **Output**: Complete proposition data with AI-generated insights
+  - **Steps**: Parallel execution of data fetching, followed by AI analysis
 
 ## 🚀 Quick Start
 
