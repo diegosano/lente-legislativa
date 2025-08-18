@@ -1,95 +1,198 @@
-# Deco MCP template app
+# Lente Legislativa - Legislative Lens
 
-A full-stack template for building
-[Model Context Protocol (MCP)](https://spec.modelcontextprotocol.io/) servers
-with a modern React frontend.
+A comprehensive platform for analyzing and understanding Brazilian legislative data using AI-powered insights and real-time data from the Câmara dos Deputados (Brazilian Chamber of Deputies).
 
-This template provides a complete development environment where your MCP server
-not only exposes tools and workflows to AI agents but also serves a beautiful
-web interface built with React and Tailwind CSS.
+## 🚀 Features
 
-## 📝 Development History
+### 📊 **Legislative Data Analysis**
 
-This repository uses [Specstory](https://specstory.com/) to track the history of prompts that were used to code this repo. You can inspect the complete development history in the [`.specstory/`](.specstory/) folder.
+- **Propositions Tracking**: Monitor bills, constitutional amendments, and legislative proposals
+- **Procedures Timeline**: Track the complete legislative journey of propositions
+- **Voting Records**: Comprehensive voting data with individual deputy votes
+- **AI-Powered Analysis**: Get intelligent explanations of legislative procedures and outcomes
 
-## ✨ Features
+### 🤖 **AI Integration**
 
-- **🤖 MCP Server**: Cloudflare Workers-based server with typed tools and
-  workflows
-- **⚛️ React Frontend**: Modern React app with Vite, TanStack Router, and
-  Tailwind CSS
-- **🎨 UI Components**: Pre-configured shadcn/ui components for rapid
-  development
-- **🔧 Type Safety**: Full TypeScript support with auto-generated RPC client
-  types
-- **🚀 Hot Reload**: Live development with automatic rebuilding for both
-  frontend and backend
-- **☁️ Ready to Deploy**: One-command deployment to Cloudflare Workers
+- **Procedures Analysis**: AI-generated explanations of what happened and what's next
+- **Proposition Summaries**: Intelligent summaries of complex legislative texts
+- **Voting Pattern Analysis**: Understand voting behaviors and outcomes
+- **Contextual Insights**: Get explanations tailored to specific legislative contexts
+
+### 🎯 **Data Sources**
+
+- **Câmara dos Deputados**: Real-time legislative data
+
+## 🏗️ Architecture
+
+### **Backend (Deco MCP Server)**
+
+- **Cloudflare Workers**: Serverless backend infrastructure
+- **Deco Runtime**: MCP (Model Context Protocol) server for AI integration
+- **SQLite Database**: Persistent data storage with Drizzle ORM
+- **RESTful API**: Comprehensive endpoints for legislative data
+
+### **Frontend (React + TypeScript)**
+
+- **React 18**: Modern React with hooks and functional components
+- **TypeScript**: Full type safety and IntelliSense
+- **Tailwind CSS**: Utility-first CSS framework
+- **TanStack Query**: Server state management and caching
+- **TanStack Router**: Type-safe routing
+
+## 🛠️ Tools & Endpoints
+
+### **Core Legislative Tools**
+
+- `GET_PROPOSITIONS` - List all legislative propositions
+- `GET_PROPOSITION` - Get detailed proposition information
+- `GET_PROPOSITION_AUTHORS` - Retrieve proposition authors and sponsors
+- `GET_PROPOSITION_PROCEDURES` - Get complete procedural timeline
+- `GET_PROPOSITION_THEMES` - Retrieve thematic classifications
+- `GET_PROPOSITION_POLLS` - Get voting records for propositions
+- `GET_POLL_DETAILS` - Detailed voting information with individual votes
+
+### **AI-Powered Tools**
+
+- `EXPLAIN_PROPOSITION_AI` - AI-generated explanations of propositions
+- `ANALYZE_PROPOSITION_PROCEDURES` - Intelligent analysis of legislative procedures
+- `ANALYZE_PROCEDURES` - AI-powered procedure analysis and insights
+
+### **Data Management Tools**
+
+- `GET_PROPOSITION_DETAILS` - Comprehensive proposition data aggregation
+- `GET_PROPOSITION_DETAILS_AI` - AI-enhanced proposition analysis
+
+## 🎨 Views & Components
+
+### **Main Pages**
+
+- **Home** (`/`) - Overview and navigation
+- **Propositions List** (`/propositions`) - Browse all legislative proposals
+- **Proposition Details** (`/proposition/:id`) - Comprehensive proposition view
+
+### **AI Analysis Components**
+
+- **Procedures Analyzer**: AI-powered analysis of legislative procedures
+- **Voting Insights**: Intelligent interpretation of voting patterns
+- **Timeline Analysis**: AI explanations of procedural developments
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### **Prerequisites**
 
-- Node.js ≥22.0.0
-- [Deco CLI](https://deco.chat): `npm i -g deco-cli`
+- Node.js >= 22.0.0
+- npm >= 8.0.0
+- Deco CLI installed globally
 
-### Setup
+### **Installation**
 
-```bash
-# Install dependencies
-npm install
+1. **Clone the repository**
 
-# Configure your app
-npm run configure
+   ```bash
+   git clone https://github.com/diegosano/lente-legislativa
+   cd lente-legislativa
+   ```
 
-# Start development server
-npm run dev
-```
+2. **Install dependencies**
 
-The server will start on `http://localhost:8787` serving both your MCP endpoints
-and the React frontend.
+   ```bash
+   npm install
+   ```
 
-## 📁 Project Structure
+3. **Install Deco CLI globally**
 
-```
-├── server/           # MCP Server (Cloudflare Workers + Deco runtime)
-│   ├── main.ts      # Server entry point with tools & workflows
-│   └── deco.gen.ts  # Auto-generated integration types
-└── view/            # React Frontend (Vite + Tailwind CSS)
-    ├── src/
-    │   ├── lib/rpc.ts    # Typed RPC client for server communication
-    │   ├── routes/       # TanStack Router routes
-    │   └── components/   # UI components with Tailwind CSS
-    └── package.json
-```
+   ```bash
+   npm i -g deco-cli 
+   ```
 
-## 🛠️ Development Workflow
+4. **Login to Deco**
 
-- **`npm run dev`** - Start development with hot reload
-- **`npm run gen`** - Generate types for external integrations
-- **`npm run gen:self`** - Generate types for your own tools/workflows
-- **`npm run deploy`** - Deploy to production
+   ```bash
+   deco login
+   ```
 
-## 🔗 Frontend ↔ Server Communication
+5. **Configure the application**
 
-The template includes a fully-typed RPC client that connects your React frontend
-to your MCP server:
+   ```bash
+   npm run configure
+   ```
 
-```typescript
-// Typed calls to your server tools and workflows
-const result = await client.MY_TOOL({ input: "data" });
-const workflowResult = await client.MY_WORKFLOW({ input: "data" });
-```
+### **Development**
 
-## 📖 Learn More
+1. **Start development server**
 
-This template is built for deploying primarily on top of the
-[Deco platform](https://deco.chat/about) which can be found at the
-[deco-cx/chat](https://github.com/deco-cx/chat) repository.
+   ```bash
+   npm run dev
+   ```
 
-Documentation can be found at [https://docs.deco.page](https://docs.deco.page)
+   This will:
+   - Start the MCP server on port 8787
+   - Build and serve the React frontend
+   - Enable hot reload for both frontend and backend
+
+2. **Generate types** (after adding new integrations)
+
+   ```bash
+   npm run gen
+   ```
+
+3. **Generate self-types** (after adding new tools/workflows)
+
+   ```bash
+   # Start the dev server first, then copy the development URL from logs
+   DECO_SELF_URL=<your-dev-url> npm run gen:self
+   ```
+
+### **Production Deployment**
+
+1. **Deploy to Cloudflare Workers**
+
+   ```bash
+   npm run deploy
+   ```
+
+2. **The app will be available at the public URL provided by Cloudflare**
+
+## 📱 Usage Examples
+
+### **AI Analysis of Procedures**
+
+1. Navigate to a proposition detail page
+2. Click the sparkles icon (✨) in the procedures timeline
+3. View AI-generated explanation of what happened and what's next
+4. Explore detailed analysis in the dialog
+
+### **Voting Analysis**
+
+1. View proposition details
+2. Scroll to the "Votações" section
+3. Click "Ver Detalhes" on any vote
+4. See individual deputy votes and party positions
+
+### **Procedural Tracking**
+
+1. Browse propositions list
+2. Select a proposition of interest
+3. View complete procedural timeline
+4. Get AI insights on procedural developments
+
+## 📚 Resources
+
+### **Documentation**
+
+- [Deco Platform Documentation](https://deco.chat/docs)
+- [Câmara dos Deputados API](https://dadosabertos.camara.leg.br/swagger/api.html)
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Câmara dos Deputados** for providing open legislative data
+- **Deco Platform** for AI integration capabilities
+- **Open Source Community** for the amazing tools and libraries
 
 ---
 
-**Ready to build your next MCP server with a beautiful frontend?
-[Get started now!](https://deco.chat)**
+## Built with ❤️ for Brazilian democracy and transparency
