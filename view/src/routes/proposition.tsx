@@ -59,7 +59,7 @@ function PropositionPage() {
             <div className="space-y-6">
               <PropositionAuthors authors={authors} />
               <PropositionThemes themes={themes} />
-              <PropositionTimeline procedures={procedures} />
+              <PropositionTimeline procedures={procedures} propositionId={proposition.id} />
             </div>
           </div>
         </div>

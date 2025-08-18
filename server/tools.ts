@@ -331,6 +331,111 @@ export const createGetPropositionDetailsTool = (env: Env) =>
     },
   });
 
+export const createAnalyzePropositionProceduresTool = (env: Env) =>
+  createTool({
+    id: "ANALYZE_PROPOSITION_PROCEDURES",
+    description: "Get procedures for a proposition and generate an AI explanation of what happened and what's going to happen",
+    inputSchema: z.object({
+      propositionId: z.number(),
+    }),
+    outputSchema: z.object({
+      explanation: z.string(),
+      procedures: z.array(
+        z.object({
+          id: z.string().nullable(),
+          uri: z.string().nullable(),
+          dataHora: z.string().nullable(),
+          sequencia: z.number().nullable(),
+          siglaOrgao: z.string().nullable(),
+          uriOrgao: z.string().nullable(),
+          regime: z.string().nullable(),
+          descricaoTramitacao: z.string().nullable(),
+          codTipoTramitacao: z.string().nullable(),
+          descricaoSituacao: z.string().nullable(),
+          codSituacao: z.number().nullable(),
+          despacho: z.string().nullable(),
+          url: z.string().nullable(),
+        }),
+      ),
+    }),
+    execute: async ({ context, runtimeContext }) => {
+      // Get the procedures for the proposition
+      const getProcedures = createGetPropositionProceduresTool(env);
+      const procedures = await getProcedures.execute({ 
+        context: { id: context.propositionId },
+        runtimeContext
+      });
+
+      if (!procedures || procedures.length === 0) {
+        return {
+          explanation: "Esta proposição não possui tramitações registradas ainda.",
+          procedures: [],
+        };
+      }
+
+      // Create a comprehensive prompt for AI analysis
+      const ANALYSIS_SCHEMA = {
+        type: "object",
+        properties: {
+          explanation: {
+            type: "string",
+            description: "Uma explicação clara e objetiva em português brasileiro sobre o que aconteceu nas tramitações e o que provavelmente vai acontecer a seguir. Use linguagem acessível mas precisa, considerando o contexto legislativo brasileiro.",
+          },
+        },
+        required: ["explanation"],
+      };
+
+      // Prepare the procedures data for AI analysis
+      const proceduresText = procedures
+        .map((proc, index) => {
+          const date = proc.dataHora ? new Date(proc.dataHora).toLocaleDateString('pt-BR') : 'Data não informada';
+          const organ = proc.siglaOrgao || 'Órgão não especificado';
+          const description = proc.descricaoTramitacao || 'Descrição não disponível';
+          const situation = proc.descricaoSituacao || 'Situação não especificada';
+          const despacho = proc.despacho || 'Sem despacho';
+          
+          return `${index + 1}. Data: ${date} | Órgão: ${organ} | Tramitação: ${description} | Situação: ${situation} | Despacho: ${despacho}`;
+        })
+        .join('\n');
+
+      const prompt = `Analise as seguintes tramitações legislativas brasileiras e forneça uma explicação clara sobre:
+
+${proceduresText}
+
+Por favor, explique:
+1. O que aconteceu em cada etapa importante
+2. O status atual da proposição
+3. Os próximos passos prováveis no processo legislativo
+4. Qual o impacto prático para os cidadãos
+
+Use linguagem clara e objetiva, considerando o contexto legislativo brasileiro.`;
+
+      const result = await env.DECO_CHAT_WORKSPACE_API.AI_GENERATE_OBJECT({
+        messages: [
+          {
+            role: "system",
+            content: "Você é um especialista em direito constitucional e processo legislativo brasileiro. Analise as tramitações fornecidas e forneça insights claros sobre o que aconteceu e o que pode acontecer a seguir. Use linguagem acessível mas precisa, focando no impacto prático para os cidadãos.",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        schema: ANALYSIS_SCHEMA,
+        temperature: 0.3, // Lower temperature for more consistent analysis
+      });
+
+      if (!result.object) {
+        throw new Error("Failed to generate procedures analysis");
+      }
+
+      return {
+        explanation: (result.object.explanation as string) ?? "Não foi possível gerar a análise das tramitações.",
+        procedures,
+      };
+    },
+  });
+
 export const tools = [
   createListPropositionsTool,
   createGetPropositionTool,
@@ -339,4 +444,5 @@ export const tools = [
   createGetPropositionThemesTool,
   createExplainPropositionAITool,
   createGetPropositionDetailsTool,
+  createAnalyzePropositionProceduresTool,
 ];
