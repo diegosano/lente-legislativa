@@ -10,6 +10,7 @@ import { AIExplanation } from "@/components/ai-explanation";
 import { BackButton } from "@/components/back-button";
 import { PropositionTimeline } from "@/components/proposition-timeline";
 import { PropositionThemes } from "@/components/proposition-themes";
+import { PropositionPolls } from "@/components/proposition-polls";
 
 function PropositionPage() {
   const { id } = useParams({ from: "/proposition/$id" });
@@ -54,6 +55,7 @@ function PropositionPage() {
                 error={error}
               />
               <PropositionContent proposition={proposition} />
+              <PropositionPolls propositionId={proposition.id} />
             </div>
 
             <div className="space-y-6">

@@ -436,6 +436,145 @@ Use linguagem clara e objetiva, considerando o contexto legislativo brasileiro.`
     },
   });
 
+export const createGetPropositionPollsTool = (env: Env) =>
+  createTool({
+    id: "GET_PROPOSITION_POLLS",
+    description: "Get the polls for a specific proposition",
+    inputSchema: z.object({
+      id: z.number(),
+    }),
+    outputSchema: z.object({
+      polls: z.array(
+        z.object({
+          id: z.number(),
+          uri: z.string().nullable(),
+          data: z.string().nullable(),
+          dataHoraRegistro: z.string().nullable(),
+          uriOrgao: z.string().nullable(),
+          siglaOrgao: z.string().nullable(),
+          descricao: z.string().nullable(),
+          aprovacao: z.number().nullable(),
+        }),
+      ),
+    }),
+    execute: async ({ context }) => {
+      const response = await fetch(
+        `https://dadosabertos.camara.leg.br/api/v2/proposicoes/${context.id}/votacoes`,
+        { headers: { Accept: "application/json" } },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch proposition polls");
+      }
+
+      const data = await response.json();
+      return { polls: data.dados };
+    },
+  });
+
+export const createGetPollDetailsTool = (env: Env) =>
+  createTool({
+    id: "GET_POLL_DETAILS",
+    description: "Get detailed information about a specific poll including individual votes",
+    inputSchema: z.object({
+      pollId: z.number(),
+    }),
+    outputSchema: z.object({
+      poll: z.object({
+        id: z.string(),
+        uri: z.string().nullable(),
+        data: z.string().nullable(),
+        dataHoraRegistro: z.string().nullable(),
+        siglaOrgao: z.string().nullable(),
+        uriOrgao: z.string().nullable(),
+        idOrgao: z.number().nullable(),
+        uriEvento: z.string().nullable(),
+        idEvento: z.number().nullable(),
+        descricao: z.string().nullable(),
+        aprovacao: z.number().nullable(),
+        descUltimaAberturaVotacao: z.string().nullable(),
+        dataHoraUltimaAberturaVotacao: z.string().nullable(),
+        ultimaApresentacaoProposicao: z.object({
+          dataHoraRegistro: z.string().nullable(),
+          descricao: z.string().nullable(),
+          uriProposicaoCitada: z.string().nullable(),
+        }).nullable(),
+        efeitosRegistrados: z.array(z.any()).nullable(),
+        objetosPossiveis: z.array(
+          z.object({
+            id: z.number(),
+            uri: z.string().nullable(),
+            siglaTipo: z.string().nullable(),
+            codTipo: z.number().nullable(),
+            numero: z.number().nullable(),
+            ano: z.number().nullable(),
+            ementa: z.string().nullable(),
+          })
+        ).nullable(),
+        proposicoesAfetadas: z.array(
+          z.object({
+            id: z.number(),
+            uri: z.string().nullable(),
+            siglaTipo: z.string().nullable(),
+            codTipo: z.number().nullable(),
+            numero: z.number().nullable(),
+            ano: z.number().nullable(),
+            ementa: z.string().nullable(),
+          })
+        ).nullable(),
+      }),
+      votes: z.array(
+        z.object({
+          id: z.number(),
+          uri: z.string().nullable(),
+          nome: z.string().nullable(),
+          sigla: z.string().nullable(),
+          siglaPartido: z.string().nullable(),
+          uriPartido: z.string().nullable(),
+          voto: z.string().nullable(),
+          deputado: z.object({
+            id: z.number(),
+            uri: z.string().nullable(),
+            nome: z.string().nullable(),
+            siglaPartido: z.string().nullable(),
+            uriPartido: z.string().nullable(),
+            siglaUf: z.string().nullable(),
+            idLegislatura: z.number().nullable(),
+            urlFoto: z.string().nullable(),
+          }).nullable(),
+        })
+      ),
+    }),
+    execute: async ({ context }) => {
+      const response = await fetch(
+        `https://dadosabertos.camara.leg.br/api/v2/votacoes/${context.pollId}`,
+        { headers: { Accept: "application/json" } },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch poll details");
+      }
+
+      const data = await response.json();
+      
+      const votesResponse = await fetch(
+        `https://dadosabertos.camara.leg.br/api/v2/votacoes/${context.pollId}/votos`,
+        { headers: { Accept: "application/json" } },
+      );
+
+      let votes = [];
+      if (votesResponse.ok) {
+        const votesData = await votesResponse.json();
+        votes = votesData.dados || [];
+      }
+
+      return {
+        poll: data.dados,
+        votes,
+      };
+    },
+  });
+
 export const tools = [
   createListPropositionsTool,
   createGetPropositionTool,
@@ -445,4 +584,6 @@ export const tools = [
   createExplainPropositionAITool,
   createGetPropositionDetailsTool,
   createAnalyzePropositionProceduresTool,
+  createGetPropositionPollsTool,
+  createGetPollDetailsTool,
 ];
